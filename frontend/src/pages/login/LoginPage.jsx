@@ -1,27 +1,36 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { login } from '../../api/AuthService'
+import { useAuth } from '../../context/AuthContext'
 import './LoginPage.css'
 
 function LoginPage() {
   const navigate = useNavigate()
+  const { login, isAuthenticated, loading } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+
+  // If the session was restored as still valid (e.g. after closing/reopening
+  // the browser), don't force the user to sign in again.
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      navigate('/admin', { replace: true })
+    }
+  }, [loading, isAuthenticated, navigate])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
-    setLoading(true)
+    setSubmitting(true)
     try {
       await login(email, password)
       navigate('/admin')
     } catch (err) {
       setError(err.message)
     } finally {
-      setLoading(false)
+      setSubmitting(false)
     }
   }
 
@@ -93,8 +102,8 @@ function LoginPage() {
 
         {error && <p className="login__error" role="alert">{error}</p>}
 
-        <button type="submit" className="login__submit" disabled={loading}>
-          {loading ? 'Signing in…' : 'Sign in'}
+        <button type="submit" className="login__submit" disabled={submitting}>
+          {submitting ? 'Signing in…' : 'Sign in'}
         </button>
 
         <a href="/" className="login__back">

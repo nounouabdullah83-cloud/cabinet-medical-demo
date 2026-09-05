@@ -70,8 +70,8 @@ const Hero = () => {
           </div>
 
           <div className="cta-group scroll-reveal">
-            <button className="btn btn-secondary">About Us</button>
-            <button className="btn btn-primary">Book Now</button>
+            <a href="#about" className="btn btn-secondary">About Us</a>
+            <a href="#book" className="btn btn-primary">Book Now</a>
           </div>
         </div>
 

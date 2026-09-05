@@ -1,5 +1,25 @@
 const API_URL = 'http://localhost:8000'
 
+let refreshPromise = null
+
+function decodeExp(token) {
+  try {
+    const payload = token.split('.')[1]
+    const padded = payload.replace(/-/g, '+').replace(/_/g, '/')
+    const json = JSON.parse(atob(padded))
+    return Number(json.exp) || 0
+  } catch {
+    return 0
+  }
+}
+
+function isTokenExpired(token) {
+  if (!token) return true
+  const exp = decodeExp(token)
+  if (!exp) return false
+  return Date.now() / 1000 >= exp
+}
+
 export async function login(email, password) {
   const response = await fetch(`${API_URL}/api/auth/login/`, {
     method: 'POST',
@@ -18,23 +38,41 @@ export async function login(email, password) {
 }
 
 export async function refreshAccessToken() {
+  if (refreshPromise) {
+    return refreshPromise
+  }
+
   const refreshToken = localStorage.getItem('refresh_token')
-  if (!refreshToken) return null
-
-  const response = await fetch(`${API_URL}/api/auth/refresh/`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ refresh: refreshToken }),
-  })
-
-  const data = await response.json()
-  if (!response.ok) {
+  if (!refreshToken) {
     logout()
     return null
   }
 
-  localStorage.setItem('access_token', data.access)
-  return data.access
+  refreshPromise = (async () => {
+    const response = await fetch(`${API_URL}/api/auth/refresh/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh: refreshToken }),
+    })
+
+    const data = await response.json()
+    if (!response.ok) {
+      logout()
+      return null
+    }
+
+    localStorage.setItem('access_token', data.access)
+    if (data.refresh) {
+      localStorage.setItem('refresh_token', data.refresh)
+    }
+    return data.access
+  })()
+
+  try {
+    return await refreshPromise
+  } finally {
+    refreshPromise = null
+  }
 }
 
 export function getAccessToken() {
@@ -60,7 +98,7 @@ export async function fetchWithAuth(url, options = {}) {
   const headers = new Headers(options.headers || {})
   let token = getAccessToken()
 
-  if (!token) {
+  if (!token || isTokenExpired(token)) {
     token = await refreshAccessToken()
   }
 

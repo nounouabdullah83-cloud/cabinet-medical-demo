@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
 import './Navebar.css'
 
 function Navbar() {
   const [open, setOpen] = useState(false)
   const [hidden, setHidden] = useState(false)
+  const { isAuthenticated, loading, logout } = useAuth()
+  const navigate = useNavigate()
 
   useEffect(() => {
     let lastY = window.scrollY
@@ -20,6 +24,12 @@ function Navbar() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
+  const handleLogout = () => {
+    setOpen(false)
+    logout()
+    navigate('/', { replace: true })
+  }
+
   return (
     <header className={`navbar${hidden ? ' navbar--hidden' : ''}`}>
       <a href="/" className="navbar__brand">
@@ -31,7 +41,17 @@ function Navbar() {
         <a href="#about">About</a>
         <a href="#services">Services</a>
         <a href="#book">Book now</a>
-        <a href="/login" className="navbar__login">Login</a>
+        {!loading &&
+          (isAuthenticated ? (
+            <>
+              <a href="/admin" className="navbar__login">Dashboard</a>
+              <button type="button" className="navbar__logout" onClick={handleLogout}>
+                Log out
+              </button>
+            </>
+          ) : (
+            <a href="/login" className="navbar__login">Login</a>
+          ))}
       </nav>
 
       <button

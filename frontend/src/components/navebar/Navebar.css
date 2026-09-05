@@ -78,6 +78,23 @@
       color: #fff;
     }
   }
+
+  .navbar__logout {
+    margin-left: 6px;
+    padding: 9px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text);
+    font: 500 15px/1 var(--sans);
+    cursor: pointer;
+    transition: color 0.2s, background 0.2s;
+
+    &:hover {
+      color: var(--danger, #e5484d);
+      background: var(--accent-bg);
+    }
+  }
 }
 
 .navbar__toggle {
@@ -152,6 +169,13 @@
     .navbar__login {
       margin-left: 0;
       margin-top: 4px;
+      text-align: center;
+    }
+
+    .navbar__logout {
+      margin-left: 0;
+      margin-top: 4px;
+      padding: 13px 14px;
       text-align: center;
     }
   }

@@ -1,34 +1,14 @@
-import { useEffect, useState } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
-import { getCurrentUser } from '../api/AuthService'
+import { useAuth } from '../context/AuthContext'
 
 function ProtectedRoute() {
-  const [checking, setChecking] = useState(true)
-  const [authed, setAuthed] = useState(false)
+  const { loading, isAuthenticated } = useAuth()
 
-  useEffect(() => {
-    let active = true
-    const check = async () => {
-      try {
-        const user = await getCurrentUser()
-        if (active) setAuthed(Boolean(user))
-      } catch {
-        if (active) setAuthed(false)
-      } finally {
-        if (active) setChecking(false)
-      }
-    }
-    check()
-    return () => {
-      active = false
-    }
-  }, [])
-
-  if (checking) {
+  if (loading) {
     return <div className="auth-pending">Loading…</div>
   }
 
-  return authed ? <Outlet /> : <Navigate to="/login" replace />
+  return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />
 }
 
 export default ProtectedRoute
