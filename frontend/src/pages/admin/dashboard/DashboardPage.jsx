@@ -3,6 +3,12 @@ import Sidebar from '../../../components/sidebar/Sidebar'
 import { getStates } from '../../../api/BookingService'
 import './DashboardPage.css'
 
+const PERIODS = [
+  { key: 'day', label: 'Last Day' },
+  { key: 'week', label: 'Last Week' },
+  { key: 'month', label: 'Last Month' },
+]
+
 const formatMAD = (value) =>
   new Intl.NumberFormat('fr-MA', {
     style: 'currency',
@@ -12,10 +18,11 @@ const formatMAD = (value) =>
 
 function DashboardPage() {
   const [stats, setStats] = useState(null)
+  const [period, setPeriod] = useState('month')
 
   useEffect(() => {
     let active = true
-    getStates()
+    getStates(period)
       .then((s) => {
         if (active) setStats(s)
       })
@@ -23,18 +30,36 @@ function DashboardPage() {
     return () => {
       active = false
     }
-  }, [])
+  }, [period])
 
   return (
     <div className="admin-layout">
       <Sidebar />
       <main className="admin-main">
-        <h1 className="admin-title">Dashboard</h1>
+        <div className="db__top">
+          <h1 className="admin-title">Dashboard</h1>
+          <div className="db__periods">
+            {PERIODS.map((p) => (
+              <button
+                key={p.key}
+                type="button"
+                className={`db__period${p.key === period ? ' db__period--active' : ''}`}
+                onClick={() => setPeriod(p.key)}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+        </div>
 
         <section className="db__card db__card--stats">
           <h2 className="db__card-title">Statistics</h2>
           {stats ? (
             <div className="db__stats-grid">
+              <div className="db__stat">
+                <span className="db__stat-label">Bookings Created</span>
+                <span className="db__stat-value">{stats.bookings_created}</span>
+              </div>
               <div className="db__stat">
                 <span className="db__stat-label">Bookings Done</span>
                 <span className="db__stat-value db__stat-value--done">{stats.bookings_done}</span>

@@ -10,9 +10,49 @@
 }
 
 .admin-title {
-  margin: 0 0 24px;
+  margin: 0;
   font: 600 26px/1.2 var(--heading);
   color: var(--text-h);
+}
+
+/* ── header ── */
+.db__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.db__periods {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+
+.db__period {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  font: 600 13px/1 var(--sans);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.db__period:hover {
+  color: var(--accent);
+}
+
+.db__period--active {
+  background: var(--accent);
+  color: #fff;
 }
 
 /* ── loading ── */

@@ -1,7 +1,9 @@
 import json
 import os
+from datetime import timedelta
 
 from django.http import Http404
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -34,7 +36,16 @@ class StaticticsView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
+        period = request.query_params.get('period', 'month')
+        days = {'day': 1, 'week': 7, 'month': 30}
+        if period not in days:
+            return Response(
+                {'detail': "Period must be 'day', 'week' or 'month'."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        since = timezone.now() - timedelta(days=days[period])
         data = read_stats()
+        data['bookings_created'] = Booking.objects.filter(created_at__gte=since).count()
         serializer = StaticticsSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         return Response(serializer.validated_data)

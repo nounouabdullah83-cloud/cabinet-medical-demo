@@ -73,8 +73,9 @@ export async function getBookingPrice(id) {
   return response.json()
 }
 
-export async function getStates() {
-  const response = await fetchWithAuth(`${API_URL}/api/states/`)
+export async function getStates(period = 'month') {
+  const params = new URLSearchParams({ period })
+  const response = await fetchWithAuth(`${API_URL}/api/states/?${params.toString()}`)
   if (!response.ok) {
     throw new Error(`Failed to fetch stats: ${response.status}`)
   }
