@@ -1,0 +1,111 @@
+.admin-layout {
+  display: flex;
+  min-height: 100svh;
+}
+
+.admin-main {
+  flex: 1;
+  padding: 32px;
+  background: color-mix(in srgb, var(--accent-bg) 40%, var(--bg));
+}
+
+.admin-title {
+  margin: 0 0 24px;
+  font: 600 26px/1.2 var(--heading);
+  color: var(--text-h);
+}
+
+/* ── loading ── */
+.db__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 48px 20px;
+  color: var(--text);
+  font: 500 14px/1 var(--sans);
+}
+
+.db__spinner {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  animation: dbSpin 0.8s linear infinite;
+}
+
+@keyframes dbSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── card ── */
+.db__card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: var(--shadow);
+}
+
+.db__card-title {
+  margin: 0 0 18px;
+  font: 600 15px/1 var(--heading);
+  color: var(--text-h);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ── stats ── */
+.db__stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.db__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent-bg) 30%, var(--bg));
+  border: 1px solid var(--border);
+}
+
+.db__stat-label {
+  font: 600 11px/1 var(--sans);
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.db__stat-value {
+  font: 700 26px/1 var(--heading);
+  color: var(--text-h);
+}
+
+.db__stat-value--done { color: #1a7f82; }
+.db__stat-value--cancelled { color: #c26060; }
+.db__stat-value--earned { color: #1a7f82; }
+
+/* ── responsive ── */
+@media (max-width: 768px) {
+  .admin-main {
+    padding: 72px 16px 24px;
+  }
+
+  .admin-title {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-main {
+    padding: 68px 12px 20px;
+  }
+
+  .db__stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

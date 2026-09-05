@@ -1,0 +1,41 @@
+.addbooking {
+  flex: 1;
+}
+
+.addbooking__head {
+  margin-bottom: 20px;
+}
+
+.addbooking__title {
+  margin: 0 0 4px;
+  font: 600 22px/1.3 var(--heading);
+  color: var(--text-h);
+}
+
+.addbooking__sub {
+  margin: 0;
+  font: 400 14px/1.5 var(--sans);
+  color: var(--text);
+}
+
+.addbooking .booking {
+  max-width: 560px;
+  margin: 0;
+  box-shadow: var(--shadow);
+}
+
+@media (max-width: 768px) {
+  .admin-main {
+    padding: 72px 16px 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-main {
+    padding: 68px 12px 20px;
+  }
+
+  .addbooking .booking {
+    padding: 24px 18px;
+  }
+}

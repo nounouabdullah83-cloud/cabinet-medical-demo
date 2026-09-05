@@ -1,0 +1,244 @@
+.login {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 100svh;
+  padding: 32px 20px;
+  overflow: hidden;
+  background:
+    radial-gradient(60% 50% at 85% 10%, var(--accent-bg) 0%, transparent 60%),
+    var(--bg);
+}
+
+.login__blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.login__blob--one {
+  width: 320px;
+  height: 320px;
+  top: -120px;
+  left: -80px;
+  background: var(--accent-bg);
+}
+
+.login__blob--two {
+  width: 380px;
+  height: 380px;
+  bottom: -160px;
+  right: -100px;
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.login__card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 420px;
+  padding: 40px 36px 36px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--bg);
+  box-shadow: var(--shadow);
+}
+
+.login__brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 28px;
+  text-decoration: none;
+  color: var(--text-h);
+}
+
+.login__mark {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: var(--accent);
+  color: #fff;
+  font: 600 26px/1 var(--sans);
+  box-shadow: 0 6px 16px var(--accent-shadow);
+}
+
+.login__name {
+  font: 600 22px/1 var(--heading);
+  letter-spacing: -0.02em;
+
+  span {
+    color: var(--accent);
+  }
+}
+
+.login__header {
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.login__title {
+  margin: 0;
+  font: 600 24px/1.2 var(--heading);
+  color: var(--text-h);
+}
+
+.login__subtitle {
+  margin: 6px 0 0;
+  font-size: 14px;
+}
+
+.login__field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-bottom: 16px;
+}
+
+.login__label {
+  font: 600 13px/1 var(--sans);
+  color: var(--text-h);
+}
+
+.login__field input {
+  width: 100%;
+  padding: 13px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  font: 15px/1 var(--sans);
+  color: var(--text-h);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+
+  &::placeholder {
+    color: color-mix(in srgb, var(--text) 55%, transparent);
+  }
+
+  &:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-bg);
+  }
+}
+
+.login__password {
+  position: relative;
+}
+
+.login__toggle {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s;
+
+  svg {
+    width: 19px;
+    height: 19px;
+  }
+
+  &:hover {
+    color: var(--text-h);
+    background: var(--accent-bg);
+  }
+}
+
+.login__password input {
+  padding-right: 46px;
+}
+
+.login__row {
+  display: flex;
+  justify-content: flex-end;
+  margin: 2px 0 22px;
+  font-size: 13px;
+}
+
+.login__forgot {
+  text-decoration: none;
+  color: var(--accent);
+  font-weight: 500;
+
+  &:hover {
+    color: var(--accent-strong);
+    text-decoration: underline;
+  }
+}
+
+.login__error {
+  margin: -4px 0 14px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, #b3261e 30%, transparent);
+  border-radius: 10px;
+  background: rgba(179, 38, 30, 0.08);
+  color: #b3261e;
+  font-size: 13px;
+}
+
+.login__submit {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #fff;
+  font: 600 15px/1 var(--sans);
+  cursor: pointer;
+  box-shadow: 0 6px 16px var(--accent-shadow);
+  transition: background 0.2s, transform 0.15s, opacity 0.2s;
+
+  &:hover:not(:disabled) {
+    background: var(--accent-strong);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.login__back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 18px;
+  text-decoration: none;
+  font: 500 13px/1 var(--sans);
+  color: var(--text);
+  transition: color 0.2s;
+
+  svg {
+    width: 14px;
+    height: 14px;
+    transition: transform 0.2s;
+  }
+
+  &:hover {
+    color: var(--accent);
+
+    svg {
+      transform: translateX(-3px);
+    }
+  }
+}
