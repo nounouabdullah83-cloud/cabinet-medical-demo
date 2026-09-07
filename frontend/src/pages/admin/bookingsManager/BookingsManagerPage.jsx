@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import Sidebar from '../../../components/sidebar/Sidebar'
 import BookingBar from '../../../components/admin/bookingBar/BookingBar'
 import BookingForm from '../../../components/booking/BookingForm'
@@ -19,7 +19,7 @@ function BookingsManagerPage() {
 
   const totalPages = Math.max(1, Math.ceil(count / PER_PAGE))
 
-  const loadBookings = (targetPage = 1, search = queryRef.current) => {
+  const loadBookings = useCallback((targetPage = 1, search = queryRef.current) => {
     setLoading(true)
     setError('')
     getBookings(targetPage, search)
@@ -30,10 +30,28 @@ function BookingsManagerPage() {
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false))
-  }
+  }, [])
 
   useEffect(() => {
-    loadBookings(1)
+    let ignore = false
+    getBookings(1, '')
+      .then((data) => {
+        if (!ignore) {
+          setBookings(data.results || [])
+          setCount(data.count || 0)
+          setPage(1)
+          setLoading(false)
+        }
+      })
+      .catch((err) => {
+        if (!ignore) {
+          setError(err.message)
+          setLoading(false)
+        }
+      })
+    return () => {
+      ignore = true
+    }
   }, [])
 
   useEffect(() => {
@@ -43,9 +61,9 @@ function BookingsManagerPage() {
       setPage(1)
     }, 300)
     return () => clearTimeout(timer)
-  }, [query])
+  }, [query, loadBookings])
 
-  const handleRemove = (id) => {
+  const handleRemove = () => {
     loadBookings(page)
   }
 
@@ -60,7 +78,7 @@ function BookingsManagerPage() {
   }
 
   const windowSize = 3
-  let start = Math.min(Math.max(page - Math.floor(windowSize / 2), 1), Math.max(totalPages - windowSize + 1, 1))
+  const start = Math.min(Math.max(page - Math.floor(windowSize / 2), 1), Math.max(totalPages - windowSize + 1, 1))
   const end = Math.min(start + windowSize - 1, totalPages)
   const pageNumbers = []
   for (let i = start; i <= end; i++) pageNumbers.push(i)

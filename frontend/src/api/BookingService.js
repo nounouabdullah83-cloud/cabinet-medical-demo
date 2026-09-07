@@ -1,6 +1,6 @@
 import { fetchWithAuth } from './AuthService'
 
-const API_URL = ''
+const API_URL = import.meta.env.VITE_API_BASE_URL || ''
 
 export async function getBookings(page = 1, query = '') {
   const params = new URLSearchParams({ page: String(page) })

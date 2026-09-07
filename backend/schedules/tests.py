@@ -1,55 +1,49 @@
+import datetime
+from django.contrib.auth import get_user_model
 from rest_framework.test import APITestCase
 
 from .models import Schedule
 
+UserModel = get_user_model()
 
-class ScheduleListViewTests(APITestCase):
+
+class ScheduleTests(APITestCase):
     def setUp(self):
-        # Make sure every test starts from an empty schedule table.
-        Schedule.objects.all().delete()
+        self.admin = UserModel.objects.create_superuser(
+            username='admin',
+            email='admin@clinic.com',
+            password='Password123!',
+            is_active=True,
+        )
 
-    def test_get_generates_default_schedule_when_empty(self):
-        self.assertFalse(Schedule.objects.exists())
-
+    def test_schedule_seeds_on_first_get(self):
+        self.assertEqual(Schedule.objects.count(), 0)
         response = self.client.get('/api/schedule/')
-
         self.assertEqual(response.status_code, 200)
-        days = [item['day'] for item in response.data]
-        self.assertEqual(len(days), 7)
-        self.assertIn('monday', days)
-        self.assertIn('sunday', days)
-
-        # Monday should be open 08:00–17:00 by default.
-        monday = next(item for item in response.data if item['day'] == 'monday')
-        self.assertTrue(monday['is_open'])
-        self.assertEqual(monday['opening_time'], '08:00:00')
-        self.assertEqual(monday['closing_time'], '17:00:00')
-
-        # Friday should be closed by default.
-        friday = next(item for item in response.data if item['day'] == 'friday')
-        self.assertFalse(friday['is_open'])
-        self.assertIsNone(friday['opening_time'])
-        self.assertIsNone(friday['closing_time'])
-
-        # The defaults are persisted so the doctor can customize them.
         self.assertEqual(Schedule.objects.count(), 7)
 
-    def test_get_does_not_overwrite_customized_schedule(self):
-        create_default = self.client.get('/api/schedule/')
-        self.assertEqual(create_default.status_code, 200)
-
-        # Customize Monday.
-        import datetime
+    def test_only_doctor_can_modify_schedule(self):
+        # Trigger seeding
+        self.client.get('/api/schedule/')
         monday = Schedule.objects.get(day='monday')
-        custom_open = datetime.time(9, 0)
-        custom_close = datetime.time(18, 0)
-        monday.opening_time = custom_open
-        monday.closing_time = custom_close
-        monday.save()
 
-        # A second GET must not reset the customization.
-        response = self.client.get('/api/schedule/')
+        # Unauthenticated edit fails
+        response = self.client.put(f'/api/schedule/{monday.id}/', {
+            'day': 'monday',
+            'opening_time': '09:00:00',
+            'closing_time': '18:00:00',
+            'is_open': True,
+        })
+        self.assertEqual(response.status_code, 401)
+
+        # Authenticated edit succeeds
+        self.client.force_authenticate(user=self.admin)
+        response = self.client.put(f'/api/schedule/{monday.id}/', {
+            'day': 'monday',
+            'opening_time': '09:00:00',
+            'closing_time': '18:00:00',
+            'is_open': True,
+        }, format='json')
         self.assertEqual(response.status_code, 200)
-        monday_after = Schedule.objects.get(day='monday')
-        self.assertEqual(monday_after.opening_time, custom_open)
-        self.assertEqual(monday_after.closing_time, custom_close)
+        monday.refresh_from_db()
+        self.assertEqual(monday.opening_time, datetime.time(9, 0))

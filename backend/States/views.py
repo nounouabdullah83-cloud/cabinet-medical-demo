@@ -1,121 +1,124 @@
-import json
-import os
-from datetime import timedelta
-
-from django.http import Http404
+from decimal import Decimal
+from django.db import transaction
+from django.db.models import F, Sum
 from django.utils import timezone
 from rest_framework import status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from bookings.models import Booking
+from schedules.permissions import IsDoctor
 
+from .models import CabinetStatistic
 from .serializers import StaticticsSerializer
 
 
-def parse_event_time(value):
-    if not value:
-        return None
-    try:
-        return timezone.datetime.fromisoformat(str(value))
-    except (ValueError, TypeError):
-        return None
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-STATS_FILE = os.path.join(BASE_DIR, 'stats_data.json')
-
-
-def read_stats():
-    try:
-        with open(STATS_FILE, encoding='utf-8') as f:
-            return json.load(f)
-    except (IOError, OSError):
-        raise Http404('Statistics data not found.')
-
-
-def write_stats(data):
-    tmp_file = STATS_FILE + '.tmp'
-    with open(tmp_file, 'w', encoding='utf-8') as f:
-        json.dump(data, f, indent=2)
-    os.replace(tmp_file, STATS_FILE)
+def get_or_create_current_stat():
+    now = timezone.now()
+    stat, _ = CabinetStatistic.objects.get_or_create(
+        year=now.year,
+        month=now.month,
+        defaults={
+            'bookings_created': 0,
+            'bookings_done': 0,
+            'bookings_cancled': 0,
+            'total_revenue': Decimal('0.00'),
+        },
+    )
+    return stat
 
 
 class StaticticsView(APIView):
-    permission_classes = [AllowAny]
+    """Secure statistics view protected for Doctor/Admin only."""
+    permission_classes = [IsAuthenticated, IsDoctor]
 
     def get(self, request):
         period = request.query_params.get('period', 'month')
-        days = {'day': 1, 'week': 7, 'month': 30}
-        if period not in days:
-            return Response(
-                {'detail': "Period must be 'day', 'week' or 'month'."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        since = timezone.now() - timedelta(days=days[period])
-        data = read_stats()
+        now = timezone.now()
 
-        events = data.get('events', [])
-        events_done = 0
-        events_cancled = 0
-        for event in events:
-            event_time = parse_event_time(event.get('t'))
-            if event_time is None or event_time < since:
-                continue
-            if event.get('type') == 'done':
-                events_done += 1
-            elif event.get('type') == 'cancel':
-                events_cancled += 1
+        # Aggregate from MonthlyStatistic table
+        if period == 'day':
+            # Current month stats as baseline for daily snapshot
+            stat = get_or_create_current_stat()
+            done = stat.bookings_done
+            cancled = stat.bookings_cancled
+            revenue = stat.total_revenue
+        elif period == 'week':
+            stat = get_or_create_current_stat()
+            done = stat.bookings_done
+            cancled = stat.bookings_cancled
+            revenue = stat.total_revenue
+        else:  # month / all-time
+            stat = get_or_create_current_stat()
+            done = stat.bookings_done
+            cancled = stat.bookings_cancled
+            revenue = stat.total_revenue
 
-        data['bookings_created'] = Booking.objects.filter(created_at__gte=since).count()
-        data['bookings_done'] = events_done
-        data['bookings_cancled'] = events_cancled
+        active_created = Booking.objects.count()
+
+        data = {
+            'bookings_created': stat.bookings_created + active_created,
+            'bookings_done': done,
+            'bookings_cancled': cancled,
+            'total_revenue': revenue,
+        }
+
         serializer = StaticticsSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         return Response(serializer.validated_data)
 
     def patch(self, request):
         action = request.data.get('action')
-        data = read_stats()
+        stat = get_or_create_current_stat()
 
-        if action == 'done':
-            data['bookings_done'] = int(data.get('bookings_done', 0)) + 1
-            try:
-                data['total_revenue'] = float(data.get('total_revenue', 0)) + float(request.data.get('price', 0))
-            except (TypeError, ValueError):
+        with transaction.atomic():
+            if action == 'done':
+                try:
+                    price = Decimal(str(request.data.get('price', 0)))
+                except (TypeError, ValueError):
+                    return Response(
+                        {'detail': 'A valid price is required for action "done".'},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                CabinetStatistic.objects.filter(pk=stat.pk).update(
+                    bookings_done=F('bookings_done') + 1,
+                    total_revenue=F('total_revenue') + price,
+                )
+            elif action == 'cancel':
+                CabinetStatistic.objects.filter(pk=stat.pk).update(
+                    bookings_cancled=F('bookings_cancled') + 1,
+                )
+            else:
                 return Response(
-                    {'detail': 'A valid price is required for action "done".'},
+                    {'detail': "Action must be 'done' or 'cancel'."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-        elif action == 'cancel':
-            data['bookings_cancled'] = int(data.get('bookings_cancled', 0)) + 1
-        else:
-            return Response(
-                {'detail': "Action must be 'done' or 'cancel'."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
 
-        events = data.get('events', [])
-        events.append({'t': timezone.now().isoformat(), 'type': action})
+        stat.refresh_from_db()
+        active_created = Booking.objects.count()
 
+        data = {
+            'bookings_created': stat.bookings_created + active_created,
+            'bookings_done': stat.bookings_done,
+            'bookings_cancled': stat.bookings_cancled,
+            'total_revenue': stat.total_revenue,
+        }
         serializer = StaticticsSerializer(data=data)
         serializer.is_valid(raise_exception=True)
-        cleaned = serializer.validated_data
-        cleaned['total_revenue'] = f"{cleaned['total_revenue']:.2f}"
-        cleaned['events'] = events
-        write_stats(cleaned)
-        return Response(cleaned)
+        return Response(serializer.validated_data)
 
 
 class ServicePriceView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
         try:
-            booking = Booking.objects.get(pk=pk)
+            booking = Booking.objects.select_related('service').get(pk=pk)
         except Booking.DoesNotExist:
             return Response(
                 {'detail': 'Not found.'},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        return Response({'booking_id': booking.id, 'service_price': booking.service.price}) 
+        price = booking.service.price if booking.service else 0.0
+        return Response({'booking_id': booking.id, 'service_price': price})

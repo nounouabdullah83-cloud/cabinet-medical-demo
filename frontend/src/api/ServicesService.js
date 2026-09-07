@@ -1,6 +1,6 @@
 import { fetchWithAuth } from './AuthService'
 
-const API_URL = ''
+const API_URL = import.meta.env.VITE_API_BASE_URL || ''
 
 export async function getTopServices() {
   const response = await fetch(`${API_URL}/api/services/`)
@@ -35,8 +35,9 @@ function buildBody(payload) {
     })
     return { body: fd, useForm: true }
   }
-  const { image, ...rest } = payload
-  return { body: JSON.stringify(rest), useForm: false }
+  const cleanPayload = { ...payload }
+  delete cleanPayload.image
+  return { body: JSON.stringify(cleanPayload), useForm: false }
 }
 
 export async function createService(payload) {
