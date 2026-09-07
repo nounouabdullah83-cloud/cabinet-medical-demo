@@ -1,6 +1,6 @@
 import { fetchWithAuth } from './AuthService'
 
-const API_URL = 'http://localhost:8000'
+const API_URL = ''
 
 export async function getSchedule() {
   const response = await fetch(`${API_URL}/api/schedule/`)

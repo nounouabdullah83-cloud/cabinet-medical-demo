@@ -1,7 +1,10 @@
 import Hero from '../../components/hero/hero'
 import AboutUs from '../../components/aboutus/aboutus'
 import Services from '../../components/services/Services'
+import Schedule from '../../components/schedule/Schedule'
 import BookingForm from '../../components/booking/BookingForm'
+import Location from '../../components/location/Location'
+import Footer from '../../components/footer/Footer'
 import './LandingPage.css'
 
 function LandingPage() {
@@ -10,6 +13,7 @@ function LandingPage() {
       <Hero />
       <AboutUs />
       <Services />
+      <Schedule />
 
       <section id="book" className="cta">
         <div className="cta__glow" aria-hidden="true" />
@@ -25,6 +29,9 @@ function LandingPage() {
         </div>
         <BookingForm />
       </section>
+
+      <Location />
+      <Footer />
     </div>
   )
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import Sidebar from '../../../components/sidebar/Sidebar'
 import { getStates } from '../../../api/BookingService'
+import BookingsChart from './BookingsChart'
 import './DashboardPage.css'
 
 const PERIODS = [
@@ -77,6 +78,18 @@ function DashboardPage() {
             <div className="db__loading">
               <div className="db__spinner" />
               <span>Loading statistics…</span>
+            </div>
+          )}
+        </section>
+
+        <section className="db__card db__card--chart">
+          <h2 className="db__card-title">Bookings comparison</h2>
+          {stats ? (
+            <BookingsChart data={stats} />
+          ) : (
+            <div className="db__loading">
+              <div className="db__spinner" />
+              <span>Loading chart…</span>
             </div>
           )}
         </section>

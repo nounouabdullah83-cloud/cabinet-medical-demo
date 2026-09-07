@@ -129,6 +129,17 @@
 .db__stat-value--cancelled { color: #c26060; }
 .db__stat-value--earned { color: #1a7f82; }
 
+/* ── chart ── */
+.db__card--chart {
+  margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+  .db__card--chart {
+    margin-top: 16px;
+  }
+}
+
 /* ── responsive ── */
 @media (max-width: 768px) {
   .admin-main {

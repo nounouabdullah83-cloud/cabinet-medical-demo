@@ -1,4 +1,7 @@
 import { useEffect } from 'react';
+import landingImg1 from '../../assets/landingpage/Close up on medical stethoscope, a Health & Medical Photo by MangoMind.jpg';
+import landingImg2 from '../../assets/landingpage/1803140908 - A medical professional stands in a hospital hallway, gently holding a glowing heart sym.jpg';
+import landingImg3 from '../../assets/landingpage/77546424822729711.jpg';
 import './hero.css';
 
 const Hero = () => {
@@ -59,13 +62,13 @@ const Hero = () => {
         <div className="hero-right">
           <div className="cards-wrapper scroll-reveal">
             <div className="card card-1">
-              <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=500" alt="Modern medical consultation" />
+              <img src={landingImg1} alt="Modern medical consultation" />
             </div>
             <div className="card card-2">
-              <img src="https://images.unsplash.com/photo-1584982751601-97dcc096659c?q=80&w=500" alt="On-site laboratory and diagnostics" />
+              <img src={landingImg2} alt="On-site laboratory and diagnostics" />
             </div>
             <div className="card card-3">
-              <img src="https://images.unsplash.com/photo-1551076805-e1869033e561?q=80&w=500" alt="Specialist patient care" />
+              <img src={landingImg3} alt="Specialist patient care" />
             </div>
           </div>
 

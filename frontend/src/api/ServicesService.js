@@ -1,6 +1,6 @@
 import { fetchWithAuth } from './AuthService'
 
-const API_URL = 'http://localhost:8000'
+const API_URL = ''
 
 export async function getTopServices() {
   const response = await fetch(`${API_URL}/api/services/`)
@@ -26,11 +26,25 @@ export async function getService(id) {
   return response.json()
 }
 
+function buildBody(payload) {
+  const isFile = payload.image instanceof File
+  if (isFile) {
+    const fd = new FormData()
+    Object.entries(payload).forEach(([key, value]) => {
+      if (value != null) fd.append(key, value)
+    })
+    return { body: fd, useForm: true }
+  }
+  const { image, ...rest } = payload
+  return { body: JSON.stringify(rest), useForm: false }
+}
+
 export async function createService(payload) {
+  const { body, useForm } = buildBody(payload)
   const response = await fetchWithAuth(`${API_URL}/api/services/all/`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    headers: useForm ? {} : { 'Content-Type': 'application/json' },
+    body,
   })
 
   const data = await response.json()
@@ -44,10 +58,11 @@ export async function createService(payload) {
 }
 
 export async function updateService(id, payload) {
+  const { body, useForm } = buildBody(payload)
   const response = await fetchWithAuth(`${API_URL}/api/services/${id}/`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    headers: useForm ? {} : { 'Content-Type': 'application/json' },
+    body,
   })
 
   const data = await response.json()

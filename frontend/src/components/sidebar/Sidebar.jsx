@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import { logout } from '../../api/AuthService'
 import './Sidebar.css'
 
@@ -52,7 +52,6 @@ const NAV_ITEMS = [
 ]
 
 function Sidebar() {
-  const navigate = useNavigate()
   const [open, setOpen] = useState(false)
 
   const close = () => setOpen(false)
@@ -60,7 +59,7 @@ function Sidebar() {
   const handleLogout = () => {
     close()
     logout()
-    navigate('/login', { replace: true })
+    window.location.href = '/'
   }
 
   return (

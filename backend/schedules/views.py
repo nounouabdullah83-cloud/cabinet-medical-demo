@@ -3,6 +3,7 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 
+from .defaults import create_default_schedule
 from .models import Schedule
 from .permissions import IsDoctor
 from .serializers import ScheduleSerializer
@@ -15,6 +16,12 @@ class ScheduleListView(APIView):
         return [IsDoctor()]
 
     def get(self, request):
+        # Generate the default schedule on first access so the doctor always
+        # has a full weekly availability to work with. Customizations made by
+        # the doctor are never overwritten (idempotent).
+        if not Schedule.objects.exists():
+            create_default_schedule()
+
         schedules = Schedule.objects.all()
         serializer = ScheduleSerializer(schedules, many=True)
         return Response(serializer.data)

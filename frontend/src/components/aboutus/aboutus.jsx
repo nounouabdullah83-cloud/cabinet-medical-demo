@@ -1,4 +1,7 @@
 import { useEffect, useRef } from 'react'
+import aboutImg1 from '../../assets/landingpage/SIRAJ photos, images, assets.jpg'
+import aboutImg2 from '../../assets/landingpage/1046101819718256577.jpg'
+import aboutImg3 from '../../assets/landingpage/⊂╭🍋⊃⊂╭🍎⊃⊂╭🍓⊃⊂╭🍇⊃⊂╭🍍⊃⊂╭🍒⊃_ 🌽معلومات صحية….jpg'
 import './aboutus.css'
 
 const ITEMS = [
@@ -11,7 +14,7 @@ const ITEMS = [
       'Appointments that respect your time',
       'Care plans explained in plain language',
     ],
-    img: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=900',
+    img: aboutImg1,
     alt: 'Doctor reviewing a care plan with a patient',
   },
   {
@@ -23,7 +26,7 @@ const ITEMS = [
       'Cardiology and heart-health management',
       'Gentle, specialist care for children',
     ],
-    img: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=900',
+    img: aboutImg2,
     alt: 'Medical team working together during care',
   },
   {
@@ -35,7 +38,7 @@ const ITEMS = [
       'Secure digital health records',
       'Modern diagnostic equipment',
     ],
-    img: 'https://images.unsplash.com/photo-1584982751601-97dcc096659c?q=80&w=900',
+    img: aboutImg3,
     alt: 'Laboratory sample being examined in the clinic lab',
   },
 ]

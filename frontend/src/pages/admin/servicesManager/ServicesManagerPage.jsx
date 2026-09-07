@@ -8,7 +8,7 @@ import {
 } from '../../../api/ServicesService'
 import './ServicesManagerPage.css'
 
-const EMPTY_FORM = { title: '', description: '', price: '', image: '' }
+const EMPTY_FORM = { title: '', description: '', price: '', image: null }
 
 function ServicesManagerPage() {
   const [services, setServices] = useState([])
@@ -48,7 +48,7 @@ function ServicesManagerPage() {
       title: service.title || '',
       description: service.description || '',
       price: service.price != null ? String(service.price) : '',
-      image: service.image || '',
+      image: null,
     })
     setFormError('')
     setModalOpen(true)
@@ -79,7 +79,7 @@ function ServicesManagerPage() {
       title,
       description,
       price,
-      image: form.image.trim() || null,
+      image: form.image instanceof File ? form.image : undefined,
     }
 
     setSaving(true)
@@ -321,13 +321,15 @@ function ServicesManagerPage() {
                   />
                 </div>
                 <div className="sm__field">
-                  <label className="sm__label" htmlFor="sm-image">Image URL <span className="sm__opt">(optional)</span></label>
+                  <label className="sm__label" htmlFor="sm-image">Image <span className="sm__opt">(optional)</span></label>
                   <input
                     id="sm-image"
-                    type="url"
-                    value={form.image}
-                    onChange={handleChange('image')}
-                    placeholder="https://…"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files && e.target.files[0]
+                      setForm((prev) => ({ ...prev, image: file || null }))
+                    }}
                   />
                 </div>
               </div>

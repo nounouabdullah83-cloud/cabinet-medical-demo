@@ -1,8 +1,12 @@
+import re
+
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 UserModel = get_user_model()
+
+CODE_PATTERN = re.compile(r'^\d{5}$')
 
 
 class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -36,3 +40,46 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserModel
         fields = ['id', 'username', 'email']
+
+
+class RequestPasswordResetSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        return value.strip().lower()
+
+
+class ConfirmResetCodeSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    code = serializers.CharField(max_length=5)
+
+    def validate_email(self, value):
+        return value.strip().lower()
+
+    def validate_code(self, value):
+        value = value.strip()
+        if not CODE_PATTERN.fullmatch(value):
+            raise serializers.ValidationError('The code must be 5 digits.')
+        return value
+
+
+class SetPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    code = serializers.CharField(max_length=5)
+    new_password = serializers.CharField(write_only=True)
+
+    def validate_email(self, value):
+        return value.strip().lower()
+
+    def validate_code(self, value):
+        value = value.strip()
+        if not CODE_PATTERN.fullmatch(value):
+            raise serializers.ValidationError('The code must be 5 digits.')
+        return value
+
+    def validate_new_password(self, value):
+        if len(value) < 8:
+            raise serializers.ValidationError(
+                'Password must be at least 8 characters long.'
+            )
+        return value

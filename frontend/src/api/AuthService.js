@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:8000'
+const API_URL = ''
 
 let refreshPromise = null
 
@@ -34,6 +34,51 @@ export async function login(email, password) {
 
   localStorage.setItem('access_token', data.access)
   localStorage.setItem('refresh_token', data.refresh)
+  return data
+}
+
+export async function requestPasswordReset(email) {
+  const response = await fetch(`${API_URL}/api/auth/reset-password/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  })
+
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.detail || 'Unable to send reset link')
+  }
+
+  return data
+}
+
+export async function confirmResetCode(email, code) {
+  const response = await fetch(`${API_URL}/api/auth/confirm-code/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, code }),
+  })
+
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.detail || 'Invalid verification code')
+  }
+
+  return data
+}
+
+export async function setNewPassword(email, code, newPassword) {
+  const response = await fetch(`${API_URL}/api/auth/set-password/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, code, new_password: newPassword }),
+  })
+
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.detail || 'Unable to update password')
+  }
+
   return data
 }
 

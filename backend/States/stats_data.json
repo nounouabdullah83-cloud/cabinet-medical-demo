@@ -1,5 +1,6 @@
 {
-  "bookings_done": 4,
-  "bookings_cancled": 2,
-  "total_revenue": "1750.00"
+  "bookings_done": 0,
+  "bookings_cancled": 0,
+  "total_revenue": "0.00",
+  "events": []
 }

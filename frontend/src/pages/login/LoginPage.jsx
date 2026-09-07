@@ -97,7 +97,7 @@ function LoginPage() {
         </label>
 
         <div className="login__row">
-          <a href="#forgot" className="login__forgot">Forgot password?</a>
+          <a href="/reset-password" className="login__forgot">Forgot password?</a>
         </div>
 
         {error && <p className="login__error" role="alert">{error}</p>}

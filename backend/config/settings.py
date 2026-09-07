@@ -26,7 +26,10 @@ SECRET_KEY = 'django-insecure-&ls)i1wafb#%71#ob!j&qbpps^h7jqq6+=sjw3#jis4x(wqs+k
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver']
+# '*' is fine for this local demo. It lets the app work over any LAN IP
+# or tunnel hostname (localtunnel/ngrok give a new subdomain each restart),
+# so you do not have to keep updating this list.
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver', '*']
 
 
 # Application definition
@@ -128,7 +131,9 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 MEDIA_URL = 'media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+# Store service images directly into the frontend's assets/services folder
+# so they live alongside the other bundled images.
+MEDIA_ROOT = BASE_DIR / '..' / 'frontend' / 'src' / 'assets' / 'services'
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
@@ -156,6 +161,12 @@ SIMPLE_JWT = {
 
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
+
+# Console backend prints emails to the terminal during development. Swap this
+# for a real SMTP backend in production (e.g. django.core.mail.backends.smtp.
+# EmailBackend) and provide EMAIL_HOST_USER / EMAIL_HOST_PASSWORD.
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'Cabinet Medical <noreply@cabinetmedical.local>'
 
 MAILERS = {
     'default': {

@@ -4,7 +4,7 @@ from .models import Service
 
 
 class ServiceSerializer(serializers.ModelSerializer):
-    image = serializers.URLField(required=False, allow_blank=True, allow_null=True)
+    image = serializers.ImageField(required=False, allow_null=True)
 
     class Meta:
         model = Service

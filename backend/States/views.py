@@ -13,6 +13,15 @@ from bookings.models import Booking
 
 from .serializers import StaticticsSerializer
 
+
+def parse_event_time(value):
+    if not value:
+        return None
+    try:
+        return timezone.datetime.fromisoformat(str(value))
+    except (ValueError, TypeError):
+        return None
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATS_FILE = os.path.join(BASE_DIR, 'stats_data.json')
 
@@ -45,7 +54,22 @@ class StaticticsView(APIView):
             )
         since = timezone.now() - timedelta(days=days[period])
         data = read_stats()
+
+        events = data.get('events', [])
+        events_done = 0
+        events_cancled = 0
+        for event in events:
+            event_time = parse_event_time(event.get('t'))
+            if event_time is None or event_time < since:
+                continue
+            if event.get('type') == 'done':
+                events_done += 1
+            elif event.get('type') == 'cancel':
+                events_cancled += 1
+
         data['bookings_created'] = Booking.objects.filter(created_at__gte=since).count()
+        data['bookings_done'] = events_done
+        data['bookings_cancled'] = events_cancled
         serializer = StaticticsSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         return Response(serializer.validated_data)
@@ -71,10 +95,14 @@ class StaticticsView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        events = data.get('events', [])
+        events.append({'t': timezone.now().isoformat(), 'type': action})
+
         serializer = StaticticsSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         cleaned = serializer.validated_data
         cleaned['total_revenue'] = f"{cleaned['total_revenue']:.2f}"
+        cleaned['events'] = events
         write_stats(cleaned)
         return Response(cleaned)
 
